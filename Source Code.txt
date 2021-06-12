@@ -1,0 +1,81 @@
+#include <Servo.h>
+int distance=0;
+float tempval=0.0,tempvalc=0.0,tempvalmv=0.0;
+int c=0;
+int max=20;
+//function for ultrasonic sensor
+long servo(int trig,int echo)
+{
+    pinMode(trig, OUTPUT); 
+  digitalWrite(trig, LOW);
+  delayMicroseconds(2);
+
+  digitalWrite(trig, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig, LOW);
+  pinMode(echo, INPUT);
+  
+  return pulseIn(echo, HIGH);
+}
+  Servo servo_7;
+  Servo servo_8;
+void setup()
+{
+  Serial.begin(9600);
+  pinMode(5,OUTPUT);
+  pinMode(7,OUTPUT);
+  pinMode(11,OUTPUT);
+}
+void loop()
+{
+   //temp sensor
+  tempval=analogRead(A0);
+  tempvalmv=tempval*5000/1024;
+  tempvalc=(tempvalmv/10)+(-50);
+  //Serial.println(tempvalc);
+  if(tempvalc<=37)
+  {
+  distance = 0.01723 * servo(10,10);
+  //Serial.println(distance);
+  servo_8.attach(6);
+  if(distance<=100)
+  {
+    servo_8.write(90);
+    c++;
+    Serial.println(c);
+  }
+  else if(distance>100)
+  {
+    servo_8.write(0);
+  }
+  }
+  else if(tempvalc>36)
+  {
+    servo_8.attach(6);
+    servo_8.write(0);
+    tone(3,1000);
+    digitalWrite(11,HIGH);
+  }
+   //Exit Servo Motor Control
+  distance = 0.01723 * servo(9,9);
+  //Serial.println(distance);
+  servo_7.attach(5);
+  if(distance<=100)
+  {
+    servo_7.write(90);
+    c--;
+    Serial.println(c);
+  }
+  else if(distance>100)
+  {
+    servo_7.write(0);
+  }
+  if(c>=max)
+  {
+    servo_8.attach(6);
+    servo_8.write(0);
+    digitalWrite(11,HIGH);
+    tone(3,1000);
+  }
+  delay(100);
+}
